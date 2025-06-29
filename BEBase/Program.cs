@@ -15,17 +15,18 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-            "http://localhost:5173",      // local dev
-            "http://somith.site",         // domain thật
-            "https://somith.site"         // nếu dùng https
-        )
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials();
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://somith.site:9000",
+                "https://somith.site",
+                "http://14.225.217.181:9000" // thêm IP nếu frontend dùng IP
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); // nếu dùng cookie hoặc auth header
     });
 });
-
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 
