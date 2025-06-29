@@ -45,17 +45,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.Register();
+builder.WebHost.UseUrls("http://0.0.0.0:80");
 
 var app = builder.Build();
 app.MapHub<ChatHub>("/chathub");
 
-//EnsureMigrate(app);
+EnsureMigrate(app);
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseStaticFiles(); // wwwroot mặc định
 
