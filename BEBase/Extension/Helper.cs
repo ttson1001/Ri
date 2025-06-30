@@ -19,9 +19,9 @@ namespace BEBase.Extension
 
         public static async Task<bool> SendNotificationEmail(string toEmail, string title, string messageContent)
         {
-            var userName = "KoiCareSystem";
-            var emailFrom = "phongdinh930@gmail.com";
-            var password = "uvfj gqho tqvl oxik";
+            var userName = "RideOnSystem";
+            var emailFrom = "rideonvie@gmail.com";
+            var password = "qzdm ixwd gjij fzzj";
 
             var subject = $"[Thông báo] {title}";
 
