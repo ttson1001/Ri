@@ -55,6 +55,7 @@ namespace BEBase.Service
                 HashedPassword = dto.Password,
                 Role = dto.Role,
                 JoinDate = DateTime.UtcNow,
+                Address = dto.Address,
                 AvatarUrl = "",
                 Phone = "",
                 Rating = null

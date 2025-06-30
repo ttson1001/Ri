@@ -122,6 +122,7 @@ namespace BEBase.Service
                 Description = vehicle.Description,
                 PricePerDay = vehicle.PricePerDay,
                 OwnerId = vehicle.OwnerId,
+                OwnerAddress = vehicle.Owner.Address,
                 Status = vehicle.Status,
                 CreatedAt = vehicle.CreatedAt,
                 OwnerName = vehicle.Owner?.Name,
@@ -257,15 +258,15 @@ namespace BEBase.Service
                     ImagesCount = images.Count,
                     Completeness = 95,
                     Description = v.Description,
-                    Location = "Chưa cập nhật", // FE tự xử nếu chưa có
+                    Location = "Chưa cập nhật",
                     Year = v.Year.ToString(),
                     Brand = v.Brand,
                     Model = v.Model,
                     LicensePlate = v.LicensePlate,
-                    EngineSize = "150cc",       // giả định default nếu chưa có trường
+                    EngineSize = "150cc",     
                     FuelType = "Xăng",
                     Transmission = "Tự động",
-                    Features = new List<string>(), // nếu chưa có field Features trong Vehicle
+                    Features = new List<string>(),
                     Images = images.Select(i => i.Url ?? "").ToList(),
                     Documents = documents.ToDictionary(
                         d => d.Type?.ToLower() ?? "unknown",
@@ -312,6 +313,7 @@ namespace BEBase.Service
                 Description = v.Description,
                 PricePerDay = v.PricePerDay,
                 Status = v.Status,
+                OwnerAddress = v.Owner.Address,
                 CreatedAt = v.CreatedAt,
                 OwnerName = v.Owner?.Name,
                 OwnerEmail = v.Owner?.Email,

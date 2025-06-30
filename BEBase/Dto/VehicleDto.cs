@@ -18,6 +18,7 @@
         public DateTime CreatedAt { get; set; }
         public int OwnerId { get; set; }
         public string OwnerName { get; set; }
+        public string OwnerAddress { get; set; }
         public string OwnerEmail { get; set; }
 
         public List<string> ImageUrls { get; set; }
