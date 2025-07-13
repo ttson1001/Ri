@@ -53,7 +53,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.Register();
-builder.WebHost.UseUrls("https://0.0.0.0:80");
+builder.WebHost.UseUrls("http://0.0.0.0:80");
 
 var app = builder.Build();
 app.MapHub<ChatHub>("/chathub");
