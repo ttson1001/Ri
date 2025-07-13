@@ -17,12 +17,12 @@ builder.Services.AddCors(options =>
     {
         policy
             .WithOrigins(
-                "http://localhost:5173",
-                "http://somith.site:9000",
-                "http://rideonvn.online",
-                "http://rideonvn.online:9000",
+                "https://localhost:5173",
+                "https://somith.site:9000",
+                "https://rideonvn.online",
+                "https://rideonvn.online:9000",
                 "https://somith.site",
-                "http://14.225.217.181:9000"
+                "https://14.225.217.181:9000"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
