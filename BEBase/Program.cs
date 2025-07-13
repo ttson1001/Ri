@@ -19,13 +19,14 @@ builder.Services.AddCors(options =>
             .WithOrigins(
                 "http://localhost:5173",
                 "http://somith.site:9000",
+                "http://rideonvn.online",
                 "http://rideonvn.online:9000",
                 "https://somith.site",
-                "http://14.225.217.181:9000" // thêm IP nếu frontend dùng IP
+                "http://14.225.217.181:9000"
             )
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // nếu dùng cookie hoặc auth header
+            .AllowCredentials();
     });
 });
 
@@ -52,7 +53,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
 builder.Services.Register();
-builder.WebHost.UseUrls("http://0.0.0.0:80");
+builder.WebHost.UseUrls("https://0.0.0.0:80");
 
 var app = builder.Build();
 app.MapHub<ChatHub>("/chathub");
