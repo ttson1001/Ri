@@ -19,6 +19,7 @@ namespace BEBase.Extension
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<ISettingService, SettingService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<IStatisticsService, StatisticsService>();
         }
     }
 }

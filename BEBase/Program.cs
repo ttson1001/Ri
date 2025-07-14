@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.ModelBuilder;
+using BEBase.Dto.BEBase.Dto;
 
 
 
@@ -16,21 +20,28 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins(
-                "https://localhost:5173",
-                "https://somith.site:9000",
-                "https://rideonvn.online",
-                "https://rideonvn.online:9000",
-                "https://somith.site",
-                "https://14.225.217.181:9000"
-            )
+            .AllowAnyOrigin()
             .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowAnyMethod();
     });
 });
 
-builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddControllers().AddNewtonsoftJson()
+    .AddOData(options => options
+        .SetMaxTop(100)
+        .Filter()
+        .OrderBy()
+        .Expand()
+        .Count()
+        .Select()
+        .AddRouteComponents("odata", GetEdmModel()));
+
+static IEdmModel GetEdmModel()
+{
+    var builder = new ODataConventionModelBuilder();
+    builder.EntitySet<UserAdminDto>("Users");
+    return builder.GetEdmModel();
+}
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(opt =>

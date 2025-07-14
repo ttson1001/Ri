@@ -18,6 +18,25 @@ namespace BEBase.Service.IService
 
         public async Task<List<UserAdminDto>> GetUsersAsync()
         {
+            return await _userRepo.Get().Include(x => x.Bookings).Include(x => x.Vehicles)
+                .Select(u => new UserAdminDto
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    Name = u.Name,
+                    Role = u.Role,
+                    Status = u.IsBlocked ? "blocked" : "active",
+                    VehicleCount = u.Vehicles.Count,
+                    RentalCount = u.Bookings.Count,
+                    JoinDate = u.JoinDate,
+                    Address = u.Address ?? "",
+                    LastActive = u.LastActiveDate
+                })
+                .ToListAsync();
+        }
+
+        public IQueryable<UserAdminDto> GetUsersQueryable()
+        {
             return _userRepo.Get().Include(x => x.Bookings).Include(x => x.Vehicles)
                 .Select(u => new UserAdminDto
                 {
@@ -29,9 +48,9 @@ namespace BEBase.Service.IService
                     VehicleCount = u.Vehicles.Count,
                     RentalCount = u.Bookings.Count,
                     JoinDate = u.JoinDate,
+                    Address = u.Address ?? "",
                     LastActive = u.LastActiveDate
-                })
-                .ToList();
+                });
         }
 
         public async Task<ApiResponse<object>> ToggleUserStatusAsync(int id)

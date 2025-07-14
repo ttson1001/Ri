@@ -56,42 +56,57 @@
 
         public async Task<ApiResponse<object>> CreateBookingAsync(BookingCreateDto dto)
         {
-            var vehicle = await _vehicleRepo.Get().FirstOrDefaultAsync(v => v.Id == dto.VehicleId);
-            if (vehicle == null)
-                return ApiResponse<object>.Failure("Xe không tồn tại");
-
-            var hasConflict = await _bookingRepo.Get()
-                .AnyAsync(b => b.VehicleId == dto.VehicleId &&
-                               b.Status != "cancelled" &&
-                               b.EndDate >= dto.StartDate &&
-                               b.StartDate <= dto.EndDate);
-            if (hasConflict)
-                return ApiResponse<object>.Failure("Xe đã được đặt trong thời gian này");
-
-            var days = (dto.EndDate - dto.StartDate).Days + 1;
-            var rentTotal = days * vehicle.PricePerDay;
-            var total = rentTotal ;
-            var com = decimal.Parse(_settingRepo.Get().First(x => x.Key == "commission").Value);
-            var deposit = total * com;
-            var booking = new Booking
+            try
             {
-                VehicleId = dto.VehicleId,
-                RenterId = dto.RenterId,
-                StartDate = dto.StartDate,
-                EndDate = dto.EndDate,
-                PickupTime = dto.PickupTime,
-                ReturnTime = dto.ReturnTime,
-                ServiceFee = dto.ServiceFee,
-                InsuranceFee = dto.InsuranceFee,
-                DepositAmount = deposit,
-                TotalAmount = total,
-                Status = "requested"
-            };
+                var vehicle = await _vehicleRepo.Get().FirstOrDefaultAsync(v => v.Id == dto.VehicleId);
+                if (vehicle == null)
+                    return ApiResponse<object>.Failure("Xe không tồn tại");
 
-            await _bookingRepo.AddAsync(booking);
-            await _bookingRepo.SaveChangesAsync();
+                var hasConflict = await _bookingRepo.Get()
+                    .AnyAsync(b => b.VehicleId == dto.VehicleId &&
+                                   b.Status != "cancelled" &&
+                                   b.EndDate >= dto.StartDate &&
+                                   b.StartDate <= dto.EndDate);
+                if (hasConflict)
+                    return ApiResponse<object>.Failure("Xe đã được đặt trong thời gian này");
 
-            return ApiResponse<object>.SuccessResponse(booking.Id, "Đặt xe thành công");
+                var days = (dto.EndDate - dto.StartDate).Days + 1;
+                var rentTotal = days * vehicle.PricePerDay;
+                var total = rentTotal;
+                
+                // Safely get commission setting
+                var commissionSetting = await _settingRepo.Get().FirstOrDefaultAsync(x => x.Key == "commission");
+                decimal com = 0.1m; // Default 10%
+                if (commissionSetting != null && decimal.TryParse(commissionSetting.Value, out decimal parsedCom))
+                {
+                    com = parsedCom;
+                }
+                
+                var deposit = total * com;
+                var booking = new Booking
+                {
+                    VehicleId = dto.VehicleId,
+                    RenterId = dto.RenterId,
+                    StartDate = dto.StartDate,
+                    EndDate = dto.EndDate,
+                    PickupTime = dto.PickupTime,
+                    ReturnTime = dto.ReturnTime,
+                    ServiceFee = dto.ServiceFee,
+                    InsuranceFee = dto.InsuranceFee,
+                    DepositAmount = deposit,
+                    TotalAmount = total,
+                    Status = "requested"
+                };
+
+                await _bookingRepo.AddAsync(booking);
+                await _bookingRepo.SaveChangesAsync();
+
+                return ApiResponse<object>.SuccessResponse(booking.Id, "Đặt xe thành công");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponse<object>.Failure($"Lỗi tạo booking: {ex.Message}");
+            }
         }
 
         public async Task<ApiResponse<List<BookingDto>>> GetBookingsByRenterAsync(int renterId, string? status)
