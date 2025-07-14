@@ -169,70 +169,74 @@
 
         public async Task<List<BookingDetailDto>> GetAllBookingDetailsAsync()
         {
-            return await _bookingRepo.Get()
+            var bookings = await _bookingRepo.Get()
                 .Include(b => b.Vehicle)
                     .ThenInclude(v => v.Owner)
                 .Include(b => b.Vehicle)
                     .ThenInclude(v => v.Images)
                 .Include(b => b.Renter)
-                .Select(booking => new BookingDetailDto
+                .ToListAsync();
+
+            var result = bookings.Select(booking => new BookingDetailDto
+            {
+                Id = booking.Id,
+                Status = booking.Status,
+                Notes = "Xe đã được kiểm tra kỹ thuật. Vui lòng giữ xe sạch sẽ và đổ đầy xăng khi trả.",
+
+                Vehicle = new BookingDetailDto.VehicleInfo
+                {
+                    Id = booking.VehicleId,
+                    Name = booking.Vehicle.Name,
+                    LicensePlate = booking.Vehicle.LicensePlate,
+                    Type = booking.Vehicle.Type,
+                    Year = booking.Vehicle.Year,
+                    Image = booking.Vehicle.Images.FirstOrDefault()?.Url ?? "/placeholder.svg"
+                },
+
+                Owner = new BookingDetailDto.UserInfo
+                {
+                    Id = booking.Vehicle.OwnerId,
+                    Name = booking.Vehicle.Owner.Name,
+                    Phone = booking.Vehicle.Owner.Phone,
+                    Avatar = booking.Vehicle.Owner.AvatarUrl ?? "/placeholder.svg",
+                    Rating = booking.Vehicle.Owner.Rating ?? 4.5f,
+                    Address = booking.Vehicle.Owner.Address
+                },
+
+                Renter = new BookingDetailDto.UserInfo
+                {
+                    Id = booking.RenterId,
+                    Name = booking.Renter.Name,
+                    Phone = booking.Renter.Phone,
+                    Avatar = booking.Renter.AvatarUrl ?? "/placeholder.svg",
+                    Rating = booking.Renter.Rating ?? 4.5f,
+                    Address = booking.Vehicle.Owner.Address
+                },
+
+                Rental = new BookingDetailDto.RentalInfo
                 {
                     Id = booking.Id,
-                    Status = booking.Status,
-                    Notes = "Xe đã được kiểm tra kỹ thuật. Vui lòng giữ xe sạch sẽ và đổ đầy xăng khi trả.",
+                    StartDate = booking.StartDate,
+                    EndDate = booking.EndDate,
+                    PickupTime = booking.PickupTime,
+                    ReturnTime = booking.ReturnTime,
+                    PickupLocation = "TP.HCM",
+                    ReturnLocation = "TP.HCM"
+                },
 
-                    Vehicle = new BookingDetailDto.VehicleInfo
-                    {
-                        Id = booking.VehicleId,
-                        Name = booking.Vehicle.Name,
-                        LicensePlate = booking.Vehicle.LicensePlate,
-                        Type = booking.Vehicle.Type,
-                        Year = booking.Vehicle.Year,
-                        Image = booking.Vehicle.Images.FirstOrDefault().Url ?? "/placeholder.svg"
-                    },
+                Pricing = new BookingDetailDto.PricingInfo
+                {
+                    DailyRate = booking.Vehicle.PricePerDay,
+                    TotalRental = (int)(booking.EndDate - booking.StartDate).TotalDays * booking.Vehicle.PricePerDay,
+                    ServiceFee = booking.ServiceFee,
+                    Insurance = booking.InsuranceFee,
+                    Deposit = booking.DepositAmount
+                }
+            }).ToList();
 
-                    Owner = new BookingDetailDto.UserInfo
-                    {
-                        Id = booking.Vehicle.OwnerId,
-                        Name = booking.Vehicle.Owner.Name,
-                        Phone = booking.Vehicle.Owner.Phone,
-                        Avatar = booking.Vehicle.Owner.AvatarUrl ?? "/placeholder.svg",
-                        Rating = booking.Vehicle.Owner.Rating ?? 4.5f,
-                        Address = "123 Nguyễn Huệ, Quận 1, TP.HCM"
-                    },
-
-                    Renter = new BookingDetailDto.UserInfo
-                    {
-                        Id = booking.RenterId,
-                        Name = booking.Renter.Name,
-                        Phone = booking.Renter.Phone,
-                        Avatar = booking.Renter.AvatarUrl ?? "/placeholder.svg",
-                        Rating = booking.Renter.Rating ?? 4.5f,
-                        Address = "Quận 5, TP.HCM"
-                    },
-
-                    Rental = new BookingDetailDto.RentalInfo
-                    {
-                        Id = booking.Id,
-                        StartDate = booking.StartDate,
-                        EndDate = booking.EndDate,
-                        PickupTime = booking.PickupTime,
-                        ReturnTime = booking.ReturnTime,
-                        PickupLocation = "TP.HCM", // placeholder nếu chưa có
-                        ReturnLocation = "TP.HCM"  // placeholder nếu chưa có
-                    },
-
-                    Pricing = new BookingDetailDto.PricingInfo
-                    {
-                        DailyRate = booking.Vehicle.PricePerDay,
-                        TotalRental = ((booking.EndDate - booking.StartDate).Days) * booking.Vehicle.PricePerDay,
-                        ServiceFee = booking.ServiceFee,
-                        Insurance = booking.InsuranceFee,
-                        Deposit = booking.DepositAmount
-                    }
-                })
-                .ToListAsync();
+            return result;
         }
+
 
 
         public async Task<BookingDetailDto?> GetBookingDetailAsync(int id)
