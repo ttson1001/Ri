@@ -106,5 +106,25 @@ namespace BEBase.Controllers
                 });
             }
         }
+
+        [HttpGet("commission-rate")]
+        public async Task<ActionResult<decimal>> GetCommissionRate()
+        {
+            try
+            {
+                var commissionRate = await _statisticsService.GetCommissionRateAsync();
+                return Ok(commissionRate);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Lỗi khi lấy tỷ lệ hoa hồng: {ex.Message}");
+            }
+        }
+
+        [HttpGet("test")]
+        public IActionResult TestEndpoint()
+        {
+            return Ok(new { message = "StatisticsController is working", timestamp = DateTime.Now });
+        }
     }
 }

@@ -27,13 +27,13 @@ namespace BEBase.Service
             var monthlyRevenue = await GetMonthlyRevenueAsync();
             var monthlyBookings = await GetMonthlyBookingsCountAsync();
 
-            // Calculate total revenue from all completed bookings
+            // Calculate total revenue from all approved bookings
             var totalRevenue = await _context.Bookings
-                .Where(b => b.Status.ToLower() == "completed")
+                .Where(b => b.Status.ToLower() == "approved")
                 .SumAsync(b => b.TotalAmount);
 
             // Get commission rate from settings
-            var commissionRate = await GetCommissionRateAsync();
+            var commissionRate = await GetCommissionRateInternalAsync();
 
             return new DashboardOverviewDto
             {
@@ -64,9 +64,9 @@ namespace BEBase.Service
 
         public async Task<decimal> GetTotalCommissionAsync()
         {
-            var commissionRate = await GetCommissionRateAsync();
+            var commissionRate = await GetCommissionRateInternalAsync();
             var totalRevenue = await _context.Bookings
-                .Where(b => b.Status.ToLower() == "completed")
+                .Where(b => b.Status.ToLower() == "approved")
                 .SumAsync(b => b.TotalAmount);
 
             return totalRevenue * commissionRate;
@@ -128,17 +128,17 @@ namespace BEBase.Service
         public async Task<RevenueStatisticsDto> GetRevenueStatisticsAsync()
         {
             var totalRevenue = await _context.Bookings
-                .Where(b => b.Status.ToLower() == "completed")
+                .Where(b => b.Status.ToLower() == "approved")
                 .SumAsync(b => b.TotalAmount);
 
-            var commissionRate = await GetCommissionRateAsync();
+            var commissionRate = await GetCommissionRateInternalAsync();
             var totalCommission = totalRevenue * commissionRate;
 
             var currentMonth = DateTime.Now.Month;
             var currentYear = DateTime.Now.Year;
 
             var monthlyRevenue = await _context.Bookings
-                .Where(b => b.Status.ToLower() == "completed" &&
+                .Where(b => b.Status.ToLower() == "approved" &&
                            b.StartDate.Month == currentMonth &&
                            b.StartDate.Year == currentYear)
                 .SumAsync(b => b.TotalAmount);
@@ -146,7 +146,7 @@ namespace BEBase.Service
             var monthlyCommission = monthlyRevenue * commissionRate;
 
             var totalBookings = await _context.Bookings.CountAsync();
-            var completedBookings = await _context.Bookings.CountAsync(b => b.Status.ToLower() == "completed");
+            var completedBookings = await _context.Bookings.CountAsync(b => b.Status.ToLower() == "approved");
 
             var monthlyBookings = await _context.Bookings
                 .CountAsync(b => b.StartDate.Month == currentMonth &&
@@ -196,7 +196,7 @@ namespace BEBase.Service
             var currentYear = DateTime.Now.Year;
 
             return await _context.Bookings
-                .Where(b => b.Status.ToLower() == "completed" &&
+                .Where(b => b.Status.ToLower() == "approved" &&
                            b.StartDate.Month == currentMonth &&
                            b.StartDate.Year == currentYear)
                 .SumAsync(b => b.TotalAmount);
@@ -212,7 +212,7 @@ namespace BEBase.Service
                            b.StartDate.Year == currentYear);
         }
 
-        private async Task<decimal> GetCommissionRateAsync()
+        private async Task<decimal> GetCommissionRateInternalAsync()
         {
             var commissionSetting = await _context.Settings
                 .FirstOrDefaultAsync(s => s.Key.ToLower() == "commission");
@@ -224,6 +224,11 @@ namespace BEBase.Service
 
             // Default commission rate if not found in settings
             return 0.20m; // 20%
+        }
+
+        public async Task<decimal> GetCommissionRateAsync()
+        {
+            return await GetCommissionRateInternalAsync();
         }
     }
 }

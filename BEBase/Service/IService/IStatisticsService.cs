@@ -18,5 +18,6 @@ namespace BEBase.Service.IService
         Task<int> GetPendingReportsCountAsync();
         Task<decimal> GetMonthlyRevenueAsync();
         Task<int> GetMonthlyBookingsCountAsync();
+        Task<decimal> GetCommissionRateAsync();
     }
 }

@@ -79,8 +79,21 @@ namespace BEBase.Controllers
         [HttpGet("detail/transactions")]
         public async Task<IActionResult> GetBookingTransactions()
         {
-            var data = await _bookingService.GetAllBookingDetailsAsync();
-            return Ok(ApiResponse<List<BookingDetailDto>>.SuccessResponse(data));
+            try
+            {
+                var data = await _bookingService.GetAllBookingDetailsAsync();
+                return Ok(ApiResponse<List<BookingDetailDto>>.SuccessResponse(data));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message, stackTrace = ex.StackTrace });
+            }
+        }
+
+        [HttpGet("test")]
+        public IActionResult TestEndpoint()
+        {
+            return Ok(new { message = "BookingController is working", timestamp = DateTime.Now });
         }
     }
 
